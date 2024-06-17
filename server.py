@@ -1,4 +1,3 @@
-# server.py
 from fastapi import FastAPI, HTTPException
 import requests
 import asyncio
@@ -48,6 +47,32 @@ def resume_game():
 def stop_game():
     global is_running
     is_running = False
+
+
+# Extend the FastAPI server to handle game control commands
+
+from fastapi import Body
+
+@app.post("/start")
+async def start(pong_time_ms: int = Body(...), other_server_url: str = Body(...)):
+    start_game(pong_time_ms, other_server_url)
+    return {"status": "started"}
+
+@app.post("/pause")
+async def pause():
+    pause_game()
+    return {"status": "paused"}
+
+@app.post("/resume")
+async def resume():
+    resume_game()
+    return {"status": "resumed"}
+
+@app.post("/stop")
+async def stop():
+    stop_game()
+    return {"status": "stopped"}
+
 
 if __name__ == "__main__":
     import uvicorn
