@@ -4,6 +4,7 @@ import sys
 def start_game(pong_time_ms):
     requests.post(f"http://localhost:8000/start", json={"pong_time_ms": pong_time_ms, "other_server_url": "http://localhost:8001"})
     requests.post(f"http://localhost:8001/start", json={"pong_time_ms": pong_time_ms, "other_server_url": "http://localhost:8000"})
+    requests.get(f"http://localhost:8000/ping")
 
 def pause_game():
     requests.post(f"http://localhost:8000/pause")
