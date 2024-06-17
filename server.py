@@ -1,6 +1,7 @@
 from fastapi import FastAPI, HTTPException
 import requests
 import asyncio
+import sys
 
 app = FastAPI()
 pong_time_ms = 1000
@@ -14,26 +15,25 @@ async def startup_event():
 
 @app.get("/ping")
 async def ping():
-    if not is_running:
-        raise HTTPException(status_code=400, detail="Game is not running")
+    asyncio.create_task(send_ping())
     return "pong"
 
 async def send_ping():
-    global is_running
-    while is_running:
-        try:
-            response = requests.get(f"{other_server_url}/ping")
-            if response.status_code == 200 and response.text == "pong":
-                await asyncio.sleep(pong_time_ms / 1000.0)
-        except requests.RequestException as e:
-            print(f"Failed to ping: {e}")
+    await asyncio.sleep(pong_time_ms / 1000)
+    try:
+        response = requests.get(f"{other_server_url}/ping")
+        if response.status_code == 200:
+            print("ping")
+        else:
+            print(f"Bad request: {response.status_code}")
+    except requests.RequestException as e:
+        print(f"Failed to ping: {e}")
 
 def start_game(pong_time, other_url):
     global pong_time_ms, other_server_url, is_running
     pong_time_ms = pong_time
     other_server_url = other_url
     is_running = True
-    asyncio.create_task(send_ping())
 
 def pause_game():
     global is_running
@@ -76,4 +76,4 @@ async def stop():
 
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run(app, host="0.0.0.0", port=8000)  # Change port for the second server
+    uvicorn.run(app, host="127.0.0.1", port=int(sys.argv[1]))
