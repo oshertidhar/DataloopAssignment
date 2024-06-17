@@ -1,4 +1,3 @@
-# pong-cli.py
 import requests
 import sys
 
